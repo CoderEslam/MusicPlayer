@@ -15,6 +15,7 @@ import android.speech.SpeechRecognizer;
 import android.support.annotation.RequiresApi;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -50,8 +51,11 @@ public class SmartPlayerActivity extends AppCompatActivity {
     private ArrayList<File> mySongs;
     private String mSongName;
     private int posiontSong;
-    /** Handles audio focus when playing a sound file */
+    /**
+     * Handles audio focus when playing a sound file
+     */
     private AudioManager mAudioManager;
+
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,6 +103,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
             @Override
             public void onError(int error) {
             }
+
             @Override
             public void onResults(Bundle results) {
                 // get resulte from Speech Recognizer and store it in ArrayList from type String
@@ -107,18 +112,16 @@ public class SmartPlayerActivity extends AppCompatActivity {
                     if (mode.equals("ON")) {
                         // get index 0  from ArrayList
                         Keeper = matchesFound.get(0);
-                        if (Keeper.equals("pause the song") || Keeper.equals("قف") || Keeper.equals("ستوب") || Keeper.equals("وقف")||Keeper.equals("stop")) {
+                        if (Keeper.equals("pause the song") || Keeper.equals("قف") || Keeper.equals("ستوب") || Keeper.equals("وقف") || Keeper.equals("stop")) {
                             PlayPauseSong();
                             Toast.makeText(SmartPlayerActivity.this, "Commend = " + Keeper, Toast.LENGTH_LONG).show();
-                        } else if (Keeper.equals("play the song") || Keeper.equals("بلاي") || Keeper.equals("اشتغل")||Keeper.equals("play")) {
+                        } else if (Keeper.equals("play the song") || Keeper.equals("بلاي") || Keeper.equals("اشتغل") || Keeper.equals("play")) {
                             PlayPauseSong();
                             Toast.makeText(SmartPlayerActivity.this, "Commend = " + Keeper, Toast.LENGTH_LONG).show();
-                        }
-                        else if (Keeper.equals("play next song") || Keeper.equals("اللي بعده")) {
+                        } else if (Keeper.equals("play next song") || Keeper.equals("اللي بعده")) {
                             PlayNextSong();
                             Toast.makeText(SmartPlayerActivity.this, "Commend = " + Keeper, Toast.LENGTH_LONG).show();
-                        }
-                        else if (Keeper.equals("play previous song") || Keeper.equals("اللي قبله") ) {
+                        } else if (Keeper.equals("play previous song") || Keeper.equals("اللي قبله")) {
                             PlayPreviousSong();
                             Toast.makeText(SmartPlayerActivity.this, "Commend = " + Keeper, Toast.LENGTH_LONG).show();
                         }
@@ -167,7 +170,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
         nextBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (MyMediaPlayer.getCurrentPosition()>0){
+                if (MyMediaPlayer.getCurrentPosition() > 0) {
                     PlayNextSong();
                 }
 
@@ -177,7 +180,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
         PreviousBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (MyMediaPlayer.getCurrentPosition()>0){
+                if (MyMediaPlayer.getCurrentPosition() > 0) {
                     PlayPreviousSong();
                 }
 
@@ -240,7 +243,7 @@ public class SmartPlayerActivity extends AppCompatActivity {
                 }).check();
     }
 
-    private void StopMedia(){
+    private void StopMedia() {
         if (MyMediaPlayer != null) {
             MyMediaPlayer.stop();
             MyMediaPlayer.release();
@@ -249,31 +252,41 @@ public class SmartPlayerActivity extends AppCompatActivity {
     }
 
     private void validataReceiveValueAndStartPlaying() {
-        StopMedia();
-        Intent intent = getIntent();
+        try {
+            StopMedia();
+            Intent intent = getIntent();
 //        Bundle bundle = intent.getExtras();
-        //لإرسال البيانات بين two activities يوجد عدة طرق, كـ shared Preference و database, لكن الطريقة المباشرة للإرسال هي عن طريق Intent بإستخدام الدوال الخاصة بها putExtra() والتي تتعامل مع جميع الـ Primitive types بطريقة مباشرة, لكن في حال أردنا أن نرسل object أو list of objects سنضطر لإستخدام ما يسمى بـ parcelable
-        //بداية ما هو الـ parcelable, هو interface يعمل كعمل الـ Serializable في جافا لكن مخصص لأندرويد, يعمل على تحويل الـ object إلى byte واستعادته كـ object مرة أخرى وفي هذه المقالة سنتكلم عنه وعن الية التعامل معه
-        mySongs = (ArrayList) intent.getExtras().getParcelableArrayList("Song");
-        mSongName = mySongs.get(position).getName();
-        String SongName = intent.getStringExtra("Name");
-        songNameTxt.setText(SongName);
-        position = intent.getExtras().getInt("Position", 0);
-        Uri uri = Uri.parse(mySongs.get(position).toString());
-        MyMediaPlayer = MediaPlayer.create(SmartPlayerActivity.this, uri);
-        MyMediaPlayer.start();
+            //لإرسال البيانات بين two activities يوجد عدة طرق, كـ shared Preference و database, لكن الطريقة المباشرة للإرسال هي عن طريق Intent بإستخدام الدوال الخاصة بها putExtra() والتي تتعامل مع جميع الـ Primitive types بطريقة مباشرة, لكن في حال أردنا أن نرسل object أو list of objects سنضطر لإستخدام ما يسمى بـ parcelable
+            //بداية ما هو الـ parcelable, هو interface يعمل كعمل الـ Serializable في جافا لكن مخصص لأندرويد, يعمل على تحويل الـ object إلى byte واستعادته كـ object مرة أخرى وفي هذه المقالة سنتكلم عنه وعن الية التعامل معه
+            mySongs = (ArrayList) intent.getExtras().getParcelableArrayList("Song");
+            mSongName = mySongs.get(position).getName();
+            String SongName = intent.getStringExtra("Name");
+            songNameTxt.setText(SongName);
+            position = intent.getExtras().getInt("Position", 0);
+            Uri uri = Uri.parse(mySongs.get(position).toString());
+            MyMediaPlayer = MediaPlayer.create(SmartPlayerActivity.this, uri);
+            MyMediaPlayer.start();
+        } catch (NullPointerException e) {
+            Log.e("NullPointerException = ", e.getMessage());
+        }
+
     }
 
 
     private void PlayPauseSong() {
-        imageView.setBackgroundResource(R.drawable.five);
-        if (MyMediaPlayer.isPlaying()) {
-            pausePlayBtn.setImageResource(R.drawable.play);
-            MyMediaPlayer.pause();
-        } else {
-            pausePlayBtn.setImageResource(R.drawable.pause);
-            MyMediaPlayer.start();
-            imageView.setBackgroundResource(R.drawable.four);
+        try {
+            imageView.setBackgroundResource(R.drawable.five);
+            if (MyMediaPlayer.isPlaying()) {
+                pausePlayBtn.setImageResource(R.drawable.play);
+                MyMediaPlayer.pause();
+            } else {
+                pausePlayBtn.setImageResource(R.drawable.pause);
+                MyMediaPlayer.start();
+                imageView.setBackgroundResource(R.drawable.four);
+            }
+
+        } catch (NullPointerException e) {
+            Log.e("NullPointerException = ", e.getMessage());
         }
 
     }
@@ -303,11 +316,11 @@ public class SmartPlayerActivity extends AppCompatActivity {
         }
     }
 
-    private void PlayPreviousSong(){
+    private void PlayPreviousSong() {
         MyMediaPlayer.pause();
         MyMediaPlayer.stop();
         MyMediaPlayer.release();
-        position = ((position-1) < 0 ? (mySongs.size() - 1) : (position - 1));
+        position = ((position - 1) < 0 ? (mySongs.size() - 1) : (position - 1));
 
         Uri uri = Uri.parse(mySongs.get(position).toString());
         MyMediaPlayer = MediaPlayer.create(SmartPlayerActivity.this, uri);

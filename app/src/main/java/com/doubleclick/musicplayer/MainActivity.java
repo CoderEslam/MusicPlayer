@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -22,8 +23,9 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    private ListView ListviewSongs ;
+    private ListView ListviewSongs;
     private String[] itemsAll;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
 
         appExternalStorageStoragePermission();
     }
+
     public void appExternalStorageStoragePermission() {
         // take peremeter (this Activity)
         // and take permission for external storage
@@ -56,47 +59,51 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }).check();
     }
+
     //retuen a ArrayList from type File
-    public ArrayList<File> ReadOnlyAudioSongs(File file){
+    public ArrayList<File> ReadOnlyAudioSongs(File file) {
         ArrayList<File> arrayList = new ArrayList<>();
-        File[] allFile = file.listFiles(); // file.listFiles return File[] type from array  this makes files in External Storage ordered a in a list as array and choose what he want
-        for (File individualFile  : allFile){
-            if (individualFile.isDirectory() && !individualFile.isHidden()){
-                // Recursion استدعاء الداله في نفسها
-                //first read all of them then put it in arrayList
-                arrayList.addAll(ReadOnlyAudioSongs(individualFile));
-            }
-            else {
-                if (individualFile.getName().endsWith(".mp3")||individualFile.getName().endsWith(".aac")||individualFile.getName().endsWith(".wma")||individualFile.getName().endsWith(".wav")){
-                    // add only in array List if ended with (mp3) or (aac) or (wma) or (wav)
-                    arrayList.add(individualFile);
+        try {
+            File[] allFile = file.listFiles(); // file.listFiles return File[] type from array  this makes files in External Storage ordered a in a list as array and choose what he want
+            for (File individualFile : allFile) {
+                if (individualFile.isDirectory() && !individualFile.isHidden()) {
+                    // Recursion استدعاء الداله في نفسها
+                    //first read all of them then put it in arrayList
+                    arrayList.addAll(ReadOnlyAudioSongs(individualFile));
+                } else {
+                    if (individualFile.getName().endsWith(".mp3") || individualFile.getName().endsWith(".aac") || individualFile.getName().endsWith(".wma") || individualFile.getName().endsWith(".wav")) {
+                        // add only in array List if ended with (mp3) or (aac) or (wma) or (wav)
+                        arrayList.add(individualFile);
+                    }
                 }
             }
+        } catch (Exception e) {
+            Log.e("Exception = ", e.getMessage());
         }
         return arrayList;
     }
 
-    private void displayAudioSongsName(){
-        final ArrayList<File>  audioSongs  = ReadOnlyAudioSongs(Environment.getExternalStorageDirectory());
+    private void displayAudioSongsName() {
+        final ArrayList<File> audioSongs = ReadOnlyAudioSongs(Environment.getExternalStorageDirectory());
 
-        itemsAll =new  String[audioSongs.size()];
+        itemsAll = new String[audioSongs.size()];
 
-        for (int songsCounter = 0;songsCounter<audioSongs.size();songsCounter++){
+        for (int songsCounter = 0; songsCounter < audioSongs.size(); songsCounter++) {
             //to get name of song and store it in String[] array
             itemsAll[songsCounter] = audioSongs.get(songsCounter).getName();
         }
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(MainActivity.this,android.R.layout.simple_list_item_1,itemsAll);
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, itemsAll);
         ListviewSongs.setAdapter(arrayAdapter);
 
         ListviewSongs.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String songName = ListviewSongs.getItemAtPosition(position).toString();
-                Intent intent = new Intent(MainActivity.this,SmartPlayerActivity.class);
+                Intent intent = new Intent(MainActivity.this, SmartPlayerActivity.class);
 //                MediaPlayer mediaPlayer = MediaPlayer.create(MainActivity.this, Uri.parse(audioSongs.get(position).toString()));
-                intent.putExtra("Song",audioSongs);
-                intent.putExtra("Name",songName);
-                intent.putExtra("Position",position);
+                intent.putExtra("Song", audioSongs);
+                intent.putExtra("Name", songName);
+                intent.putExtra("Position", position);
                 startActivity(intent);
             }
         });
